@@ -29,6 +29,8 @@ type Node struct {
 
 type Graph struct {
 	nodes []*Node
+	// Only for tests
+	visitedForTests []int
 }
 
 type Data struct {
@@ -143,6 +145,7 @@ func (g *Graph) depthSearch(index int, rollback bool) {
 
 	if !rollback {
 		g.nodes[index].visited = 1
+		g.visitedForTests = append(g.visitedForTests, index)
 		fmt.Println(node.label)
 	}
 
@@ -172,6 +175,23 @@ func (g *Graph) search() {
 	g.depthSearch(nodIni, false)
 }
 
+func isIn(v int, s []int) bool {
+	for _, o := range s {
+		if v == o {
+			return true
+		}
+	}
+	return false
+}
+
+func testDepthSearch(graph *Graph) {
+	for i := 1; i <= 200; i++ {
+		if !isIn(i, graph.visitedForTests) {
+			fmt.Printf("Error: %d missing.\n", i)
+		}
+	}
+}
+
 func main() {
 	start := time.Now()
 	name := "./data/data_graf.txt"
@@ -189,4 +209,5 @@ func main() {
 	fmt.Printf("Finish time %s \n", elapsed)
 
 	gr.search()
+	testDepthSearch(&gr)
 }
