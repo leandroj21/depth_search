@@ -134,15 +134,17 @@ func (g *Graph) display() {
 	}
 }
 
-func (g *Graph) depthSearch(index, nodesVisited int) {
-	if nodesVisited > len(g.nodes) {
+func (g *Graph) depthSearch(index int, rollback bool) {
+	if index == 0 {
 		return
 	}
 
 	node := g.nodes[index]
-	g.nodes[index].visited = 1
-	nodesVisited += 1
-	fmt.Println(node.label)
+
+	if !rollback {
+		g.nodes[index].visited = 1
+		fmt.Println(node.label)
+	}
 
 	// Look for the next node
 	minimum := MaxInt
@@ -152,26 +154,22 @@ func (g *Graph) depthSearch(index, nodesVisited int) {
 		}
 	}
 
-	// Control that the minimum it is in the first index and all the other
-	// neighbors are visited
-	//if paths == 0 && g.nodes[minimum.label].visited != 1 {
-	//	paths++
-	//}
-	// Return to previous node
 	if minimum == MaxInt {
 		// Do not change nodesVisited
-		g.depthSearch(node.previo, nodesVisited)
+		g.depthSearch(node.previo, true)
 		return
 	}
 
+	// Continue to the next min node
 	g.nodes[minimum].previo = index
-	g.depthSearch(minimum, nodesVisited)
+	g.depthSearch(minimum, false)
+
 	return
 }
 
 // Depth search with min
 func (g *Graph) search() {
-	g.depthSearch(nodIni, 0)
+	g.depthSearch(nodIni, false)
 }
 
 func main() {
