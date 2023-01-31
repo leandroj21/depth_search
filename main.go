@@ -21,9 +21,8 @@ type Edge struct {
 
 type Node struct {
 	label     int // nombre del nodo
-	visited   int // 0 not visited, -1 gray, 1 visited
+	visited   bool
 	previo    int // indice a nodo anterior en recorrido
-	dist      int // distancia al nodo inicial
 	neighbors []Edge
 }
 
@@ -121,7 +120,7 @@ func (g *Graph) depthSearch(index int, rollback bool) {
 	node := g.nodes[index]
 
 	if !rollback {
-		g.nodes[index].visited = 1
+		g.nodes[index].visited = true
 
 		// For printing
 		g.visitedNodes = append(g.visitedNodes, index)
@@ -130,7 +129,7 @@ func (g *Graph) depthSearch(index int, rollback bool) {
 	// Look for the next node
 	minimum := MaxInt
 	for _, neighbor := range node.neighbors {
-		if neighbor.label < minimum && g.nodes[neighbor.label].visited != 1 {
+		if neighbor.label < minimum && !g.nodes[neighbor.label].visited {
 			minimum = neighbor.label
 		}
 	}
