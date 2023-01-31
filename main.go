@@ -150,19 +150,14 @@ func (g *Graph) search() {
 	g.depthSearch(nodIni, false)
 }
 
-func isIn(v int, s []int) bool {
-	for _, o := range s {
-		if v == o {
-			return true
-		}
-	}
-	return false
-}
-
 func testDepthSearch(graph *Graph) {
-	for i := 1; i <= 200; i++ {
-		if !isIn(i, graph.visitedNodes) {
-			fmt.Printf("Error: %d missing.\n", i)
+	for _, node := range graph.nodes {
+		if node == nil {
+			continue
+		}
+
+		if !node.visited {
+			fmt.Printf("Error: %d missing.\n", node.label)
 		}
 	}
 }
