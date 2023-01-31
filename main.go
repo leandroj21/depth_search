@@ -96,20 +96,18 @@ func (g *Graph) readFile(name string) (nrnod, nrlin int) {
 }
 
 func (g *Graph) display() {
-	s := ""
-	for i := 1; i < len(g.nodes); i++ {
-		near := g.nodes[i]
-		if near == nil {
-			continue
+	fmt.Printf("\nNodes visited in order:\n")
+	breakLine := 0
+	for _, node := range g.visitedNodes {
+		fmt.Printf("%-3d  ", node)
+		if breakLine == 9 {
+			fmt.Println("")
+			breakLine = 0
+		} else {
+			breakLine++
 		}
-		s += fmt.Sprintf(" %5d --> ", near.label)
-		for _, edge := range near.neighbors {
-			//             s += fmt.Sprintf(" %5d %8d | ",edge.label , edge.distance)
-			s += fmt.Sprintf(" %5d | ", edge.label)
-		}
-		fmt.Println(s)
-		s = ""
 	}
+	fmt.Println("")
 }
 
 func (g *Graph) depthSearch(index int, rollback bool) {
@@ -201,22 +199,26 @@ func printRequiredNodes(graph *Graph) {
 }
 
 func main() {
+	// Reading file and inserting nodes
 	start := time.Now()
 	name := "./data/data_graf.txt"
 	if len(os.Args) > 1 {
 		name = "./data/" + os.Args[1]
 	}
-	fmt.Println("main Inic")
 	var gr Graph
 	(&gr).readFile(name)
 	elapsed := time.Since(start)
-	fmt.Printf("ReadFile time %s \n", elapsed)
-	//(&gr).display()
+	fmt.Println("Inserting nodes time elapsed:", elapsed)
 
 	gr.search()
+
 	elapsed = time.Since(start)
-	fmt.Printf("Finish time %s \n", elapsed)
+	fmt.Println("Finish time:", elapsed)
+
+	// Test that all nodes are visited
 	testDepthSearch(&gr)
+
+	gr.display()
 
 	printRequiredNodes(&gr)
 }
