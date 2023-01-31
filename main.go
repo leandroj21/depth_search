@@ -68,11 +68,16 @@ func (g *Graph) insertNode(data Data) {
 func (g *Graph) readFile(name string) (nrnod, nrlin int) {
 	file, err := os.Open(name)
 	check("No se abrio archivos ", err)
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			fmt.Println("Something bad just happened")
+		}
+	}(file)
 	scanner := bufio.NewScanner(file)
 	scanner.Scan()
 	line := scanner.Text()
-	fmt.Sscanf(line, "%d %d", &nrnod, &nrlin)
+	_, _ = fmt.Sscanf(line, "%d %d", &nrnod, &nrlin)
 	g.nodes = make([]*Node, nrnod+1)
 
 	for scanner.Scan() {
