@@ -28,9 +28,8 @@ type Node struct {
 }
 
 type Graph struct {
-	nodes []*Node
-	// Only for tests
-	visitedForTests []int
+	nodes        []*Node
+	visitedNodes []int
 }
 
 type Data struct {
@@ -43,33 +42,6 @@ func check(st string, e error) {
 		fmt.Println(st)
 		panic(e)
 	}
-}
-
-func enlista(pos int, ls []int) (res bool) {
-	for _, dat := range ls {
-		if dat*1_000 == pos {
-			res = true
-			break
-		}
-	}
-	return
-}
-
-func presentar(pg *Graph, nd int, start time.Time) {
-	fmt.Printf("%5.5s %9.9s %8.8s \n", "Nodo", "Distancia", "Tiempo")
-	elapsed := time.Since(start)
-	dist := pg.nodes[nd].dist
-	fmt.Printf("%05d    %06d    %s\n", nd, dist, elapsed)
-	for nd > 1 {
-		fmt.Print(nd, pg.nodes[nd].dist, " -> ")
-		nd = pg.nodes[nd].previo
-	}
-	fmt.Println(nd)
-}
-
-func iniGraph(tsize int) (g Graph) {
-	g.nodes = make([]*Node, tsize+1)
-	return
 }
 
 func (g *Graph) insertNode(data Data) {
@@ -145,8 +117,9 @@ func (g *Graph) depthSearch(index int, rollback bool) {
 
 	if !rollback {
 		g.nodes[index].visited = 1
-		g.visitedForTests = append(g.visitedForTests, index)
-		fmt.Println(node.label)
+
+		// For printing
+		g.visitedNodes = append(g.visitedNodes, index)
 	}
 
 	// Look for the next node
@@ -186,10 +159,41 @@ func isIn(v int, s []int) bool {
 
 func testDepthSearch(graph *Graph) {
 	for i := 1; i <= 200; i++ {
-		if !isIn(i, graph.visitedForTests) {
+		if !isIn(i, graph.visitedNodes) {
 			fmt.Printf("Error: %d missing.\n", i)
 		}
 	}
+}
+
+func printRequiredNodes(graph *Graph) {
+	length := len(graph.visitedNodes)
+	firstNodes := ""
+	lastNodes := ""
+	c, breakLine := 0, 0
+	separator := " "
+	for i, j := 0, length-15; i <= length-1 && j <= length-1; i, j = i+1, j+1 {
+		// Printing options
+		if c == 15 {
+			break
+		}
+		if breakLine == 4 {
+			separator = "\n"
+			breakLine = -1
+		}
+
+		firstNodes += fmt.Sprintf("=> %-3d%s", graph.visitedNodes[i], separator)
+		lastNodes += fmt.Sprintf("=> %-3d%s", graph.visitedNodes[j], separator)
+
+		// Variables used for printing
+		c++
+		breakLine++
+		separator = " "
+	}
+	fmt.Printf("First %d nodes:\n", c)
+	fmt.Println(firstNodes)
+
+	fmt.Printf("Last %d nodes:\n", c)
+	fmt.Println(lastNodes)
 }
 
 func main() {
@@ -205,9 +209,10 @@ func main() {
 	fmt.Printf("ReadFile time %s \n", elapsed)
 	//(&gr).display()
 
+	gr.search()
 	elapsed = time.Since(start)
 	fmt.Printf("Finish time %s \n", elapsed)
-
-	gr.search()
 	testDepthSearch(&gr)
+
+	printRequiredNodes(&gr)
 }
