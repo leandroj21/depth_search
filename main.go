@@ -31,37 +31,11 @@ type Graph struct {
 	visitedNodes []int
 }
 
-type Data struct {
-	source int
-	dest   int
-}
-
 func check(st string, e error) {
 	if e != nil {
 		fmt.Println(st)
 		panic(e)
 	}
-}
-
-func (g *Graph) insertNode(data Data) {
-	var edge Edge
-	var node Node
-
-	// Definir como -1 para evitar errores
-	node.previo = -1
-
-	edge.label = data.dest
-	i := data.source
-	node.label = i
-	if g.nodes[i] == nil {
-		g.nodes[i] = &node
-	}
-	if g.nodes[edge.label] == nil {
-		g.nodes[edge.label] = new(Node)
-		g.nodes[edge.label].label = edge.label
-	}
-	g.nodes[i].neighbors = append(g.nodes[i].neighbors, edge)
-	return
 }
 
 func (g *Graph) readFile(name string) (nrnod, nrlin int) {
@@ -193,6 +167,29 @@ func printRequiredNodes(graph *Graph) {
 	fmt.Println(lastNodes)
 }
 
+// Check for nodes that are not inserted in the graph but are shown as a neighbor
+func checkNodes(g *Graph) {
+	justAdded := make(map[int]bool)
+	for _, node := range g.nodes {
+		if node == nil {
+			continue
+		}
+
+		for _, neighbor := range node.neighbors {
+			if g.nodes[neighbor.label] == nil {
+				justAdded[neighbor.label] = true
+				g.nodes[neighbor.label] = &Node{label: neighbor.label, previo: -1}
+				g.nodes[neighbor.label].neighbors = append(g.nodes[neighbor.label].neighbors, Edge{label: node.label})
+				continue
+			}
+
+			if _, exists := justAdded[neighbor.label]; exists {
+				g.nodes[neighbor.label].neighbors = append(g.nodes[neighbor.label].neighbors, Edge{label: node.label})
+			}
+		}
+	}
+}
+
 func main() {
 	// Reading file and inserting nodes
 	start := time.Now()
@@ -204,16 +201,19 @@ func main() {
 	(&gr).readFile(name)
 	elapsed := time.Since(start)
 	fmt.Println("Inserting nodes time elapsed:", elapsed)
+	checkNodes(&gr)
 
+	start = time.Now()
 	gr.search()
-
 	elapsed = time.Since(start)
-	fmt.Println("Finish time:", elapsed)
+	fmt.Println("Depth search time elapsed:", elapsed)
 
 	// Test that all nodes are visited
 	testDepthSearch(&gr)
 
 	gr.display()
 
-	printRequiredNodes(&gr)
+	if len(gr.nodes) > 15 {
+		printRequiredNodes(&gr)
+	}
 }
